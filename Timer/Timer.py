@@ -1,3 +1,7 @@
+# Author: Mikael Brudfors (brudfors@gmail.com)
+# Date: Aug. 2015
+# Free for anyone to use!
+
 import time
 
 class Timer():
