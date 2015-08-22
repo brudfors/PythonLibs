@@ -4,36 +4,37 @@
 
 import time
 
-class Timer():
+# A StopWatch object with pause and reset functionality
+class StopWatch():
 
   def __init__(self):
     self.startTime = 0.0
     self.startedTime = 0.0
-    self.timerIsRunning = False
+    self.isRunning = False
     
-  def startTimer(self):
-    if not self.timerIsRunning:
+  def start(self):
+    if not self.isRunning:
       self.startTime = time.clock()
-      self.timerIsRunning = True
+      self.isRunning = True
     else:
       print 'Timer alredy running!'
     
-  def stopTimer(self):
-    if self.timerIsRunning:
+  def pause(self):
+    if self.isRunning:
       stopTime = time.clock()
       self.startedTime += (stopTime - self.startTime)
-      self.timerIsRunning = False
+      self.isRunning = False
     else:
       print 'Timer not running!'
       
   def getElapsedTime(self):
     if self.startTime == 0.0:
       return 0.0
-    elif self.timerIsRunning:
+    elif self.isRunning:
       return time.clock() - self.startTime + self.startedTime
-    elif not self.timerIsRunning:
+    elif not self.isRunning:
       return self.startedTime
       
-  def resetTimer(self):
+  def reset(self):
     self.startTime = time.clock()
     self.startedTime = 0.0

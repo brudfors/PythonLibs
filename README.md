@@ -3,4 +3,4 @@
 A collection of some of my Python libraries.
 
 ## Content
-* Timer: Info
+* StopWatch: A StopWatch object with pause and reset functionality

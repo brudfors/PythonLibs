@@ -1,2 +1,0 @@
-python testTimer.py
-pause
