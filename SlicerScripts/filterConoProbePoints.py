@@ -2,6 +2,7 @@ def filterConoProbePoints(modelNode, csvPath, snrThreshold, distanceMinimumValue
   import csv  
   snr = []
   distance = []
+  previousRAS = []
   ras = []
   count = 0
   with open(csvPath, 'rb') as csvfile:
@@ -13,24 +14,30 @@ def filterConoProbePoints(modelNode, csvPath, snrThreshold, distanceMinimumValue
       ras.append(row[0:3])
       snr.append(float(row[4]))
       distance.append(float(row[3]))
-      if count == 1:
-        print ras[0]
-        print snr[0]
-        print distance[0]
-        count += 1      
+      # if count == 1:
+        # print ras[0]
+        # print snr[0]
+        # print distance[0]
+        # count += 1      
   # Create new vtkPolyData
   newPoints = vtk.vtkPoints()
   newVertices = vtk.vtkCellArray()               
   newPolyData = vtk.vtkPolyData()
   newPolyData.SetPoints(newPoints)
   newPolyData.SetVerts(newVertices)
+  print 'Points before filtering = ' + str(len(ras))
   # Filter accordingly to the input parameters 
-  for idx in range(len(distance)):    
+  for idx in range(len(distance)):   
     if (snr[idx] > snrThreshold and distance[idx] < distanceMaximumValue and distance[idx] > distanceMinimumValue):        
-      addPointToPolyData(newPolyData, ras[idx])
+      if idx > 0: 
+        if ras[idx - 1] != ras[idx]:
+          addPointToPolyData(newPolyData, ras[idx])  
+          continue
+      addPointToPolyData(newPolyData, ras[idx])            
   # Update recorded model and buffer
   modelNode.GetPolyData().DeepCopy(newPolyData)     
   modelNode.GetPolyData().Modified()  
+  print 'Points after filtering = ' + str(modelNode.GetPolyData().GetNumberOfPoints())
 
 def addPointToPolyData(polyData, ras):      
   pid = vtk.vtkIdList()
@@ -55,5 +62,4 @@ def createModelNode(name, color):
   scene.AddNode(modelNode)  
   
 createModelNode('FilteredPoints', [1,0,0])
-m = getNode('FilteredPoints')
-filterConoProbePoints(m, 'H:/ConoProbe_Experiments_2015-09-11/L/Points_2015-09-11_16-28-47.csv', 91, 150, 350)
+filterConoProbePoints(getNode('FilteredPoints'), 'H:/ConoProbe_Experiments_2015-09-11/L/Points_2015-09-11_16-28-47.csv', 91, 150, 350)
