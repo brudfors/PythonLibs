@@ -18,9 +18,12 @@ def colorPointData(modelNode, min, max, newMin, newMax):
     colorTable.GetColor(int(tableValue), color) # 0 -> 255
     colorArray.InsertTuple(i, color)
     
-p=getNode('Points_2015-09-11_16-28-47')
+p=getNode('Points_2015-09-11_17-43-49')
 colorPointData(p, -30, 0, 0, 255)
 
 m=p.GetModelDisplayNode()
 m.SetActiveScalarName('Colors')
 m.SetScalarVisibility(True)
+
+p=getNode('Points_2015-09-11_16-28-47')
+colorPointData(p, -27, 27, 0, 255)

@@ -17,10 +17,8 @@ def filterConoProbePoints(modelNode, csvPath, snrThreshold, distanceMinimumValue
   newPolyData.SetVerts(newVertices)
   # Filter accordingly to the input parameters  
   for idx in range(len(distance)):    
-    if (snr[idx] > snrThreshold and
-        distance[idx] < distanceMaximumValue and       
-        distance[idx] > distanceMinimumValue):        
-        addPointToPolyData(newPolyData, ras[idx])
+    if (snr[idx] > snrThreshold and distance[idx] < distanceMaximumValue and distance[idx] > distanceMinimumValue):        
+      addPointToPolyData(newPolyData, ras[idx])
   # Update recorded model and buffer
   modelNode.GetPolyData().DeepCopy(newPolyData)     
   modelNode.GetPolyData().Modified()  
