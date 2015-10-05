@@ -1,15 +1,21 @@
-def registerPointSetsUsingICP(nameModelNode1, nameModelNode2, nbrOfIterations, maximumNumberOfLandmarks):
+# Copy paste this script into the 3D Slicer Python console 
+# and call it with the name of the two models you want to register.
+# Will register fromModelNode to toModelNode.
+def registerPointSetsUsingICP(fromModelNodeName, 
+                              toModelNodeName, 
+                              nbrOfIterations, 
+                              maximumNumberOfLandmarks):
   import math
   import numpy as np
-  modelNode1 = getNode(nameModelNode1)
-  modelNode2 = getNode(nameModelNode2)
-  if modelNode1 and modelNode2:
-    polyData1 = modelNode1.GetPolyData()
-    polyData2 = modelNode2.GetPolyData()
+  fromModelNode = getNode(fromModelNodeName)
+  toModelNode = getNode(toModelNodeName)
+  if fromModelNode and toModelNode:
+    fromPolyData = fromModelNode.GetPolyData()
+    toPolyData = toModelNode.GetPolyData()
     # Setup vtkIterativeClosestPointTransform
     icp = vtk.vtkIterativeClosestPointTransform()
-    icp.SetSource(polyData1)
-    icp.SetTarget(polyData2)
+    icp.SetSource(fromPolyData)
+    icp.SetTarget(toPolyData)
     icp.GetLandmarkTransform().SetModeToRigidBody()
     icp.SetMaximumNumberOfIterations(nbrOfIterations)
     icp.SetMaximumNumberOfLandmarks(maximumNumberOfLandmarks)
@@ -27,8 +33,30 @@ def registerPointSetsUsingICP(nameModelNode1, nameModelNode2, nbrOfIterations, m
       model1ToModel2.SetName("Model1ToModel2")
       slicer.mrmlScene.AddNode(model1ToModel2)
     model1ToModel2.SetMatrixTransformToParent(m)
-    modelNode1.SetAndObserveTransformNodeID(model1ToModel2.GetID())    
+    fromModelNode.SetAndObserveTransformNodeID(model1ToModel2.GetID())    
+    # Build locator from toPolyData
+    cellLocator = vtk.vtkCellLocator()
+    cellLocator.SetDataSet(toPolyData)
+    cellLocator.BuildLocator()
+    # For each point in fromPolyData calculate and store distance
+    # to the closest point in toPolyData
+    distances = []
+    distancesSquared = []
+    for idx in range(fromPolyData.GetNumberOfPoints()):
+      point = fromPolyData.GetPoint(idx)
+      closestPoint = [0.0, 0.0, 0.0]
+      distanceSquared = vtk.mutable(0.0) 
+      subId = vtk.mutable(0) 
+      cellId = vtk.mutable(0) 
+      cell = vtk.vtkGenericCell()
+      cellLocator.FindClosestPoint(point, closestPoint, cell, cellId, subId, distanceSquared)
+      distancesSquared.append(distanceSquared)
+      distances.append(math.sqrt(distanceSquared))     
+    print "Mean distance error is: " + str(np.mean(distances))
+    print "RMSE: " + str(np.sqrt(np.mean(distancesSquared)))
+    print "Std.dev. is: " + str(np.std(distances))
+    print "Max is: " + str(np.max(distances))
+    print fromModelNode.GetName() + ": " + str(fromPolyData.GetNumberOfPoints()) + " points"
+    print toModelNode.GetName() + ": " + str(toPolyData.GetNumberOfPoints()) + " points"
   else:
-    print "Model node doesn't exist!"
-    
-registerPointSetsUsingICP('L_open','L_points_SNR-90_20608', 20, 200)    
+    print "Model node doesn't exist!"    
